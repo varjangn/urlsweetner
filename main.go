@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/gorilla/mux"
 	"github.com/varjangn/urlsweetner/db"
@@ -13,15 +12,13 @@ import (
 
 func main() {
 	var err error
-	db.DbRepo, err = db.NewSQLiteRepository("urlsweetnet.db")
+	db.DbRepo, err = db.NewSQLiteRepository("urlsweetner.db")
 	if err != nil {
 		panic(err)
 	}
 	if err := db.DbRepo.Migrate(); err != nil {
 		panic(err)
 	}
-
-	handlers.JwtSecret = os.Getenv("JWT_SECRET")
 
 	router := mux.NewRouter()
 

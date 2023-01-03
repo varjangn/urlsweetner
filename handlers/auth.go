@@ -3,11 +3,13 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/varjangn/urlsweetner/db"
 	"github.com/varjangn/urlsweetner/models"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type registerForm struct {
@@ -26,8 +28,6 @@ type loginResponse struct {
 	Token string      `json:"token"`
 	User  models.User `json:"user"`
 }
-
-var JwtSecret string
 
 func Register(w http.ResponseWriter, r *http.Request) {
 	cType := r.Header.Get("Content-Type")
@@ -74,15 +74,22 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	user, err := db.DbRepo.GetUser(formData.email)
-	if err != nil || !user.CheckPassword(formData.password) {
+	if err != nil {
 		http.Error(w, "Invalid credentials", http.StatusBadRequest)
 		return
 	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(formData.password))
+	if err != nil {
+		http.Error(w, "Invalid credentials", http.StatusBadRequest)
+		return
+	}
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub": user.Email,
 		"exp": time.Now().Add(time.Minute * 10).Unix(),
 	})
-	tokenString, err := token.SignedString([]byte(JwtSecret))
+	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}

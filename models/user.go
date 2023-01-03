@@ -15,7 +15,7 @@ type User struct {
 }
 
 func NewUser(email, password, firstname, lastname string) (*User, error) {
-	hashedPass, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	hashedPass, err := bcrypt.GenerateFromPassword([]byte(password), 10)
 	if err != nil {
 		return nil, err
 	}
@@ -30,13 +30,8 @@ func NewUser(email, password, firstname, lastname string) (*User, error) {
 	}, nil
 }
 
-func (u *User) CheckPassword(password string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password))
-	return err == nil
-}
-
 func (u *User) UpdatePassword(newPassword string) (string, error) {
-	hashedPass, err := bcrypt.GenerateFromPassword([]byte(newPassword), 14)
+	hashedPass, err := bcrypt.GenerateFromPassword([]byte(newPassword), 10)
 	if err != nil {
 		return "", err
 	}
