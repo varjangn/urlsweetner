@@ -44,6 +44,9 @@ func main() {
 	router.HandleFunc("/login", middlewares.Chain(
 		handlers.Login, middlewares.Method("POST"), middlewares.Logging()))
 
+	router.HandleFunc("/hello", middlewares.Chain(
+		handlers.Hello, middlewares.RequireAuth()))
+
 	log.Println("Listening on port 8080")
 	http.ListenAndServe(":8080", router)
 }
